@@ -9,26 +9,49 @@ public class MuderRobotAI : MonoBehaviour
     [SerializeField] private List<Transform> targets;
 
     public float distanceThrehold = 1.0f;
+    private int current = 0, delay = 3;
+    private GameObject enemy;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-        agent.SetDestination(targets[0].position);
-        
+        MoveToNextTaget();
     }
 
     // Update is called once per frame
     void Update()
     {
-        for(int i = 0; i < targets.Count; i++)
+        if (Vector3.Distance(transform.position, targets[current].position) <= distanceThrehold)
         {
-            if (Vector3.Distance(transform.position, targets[i].position) <= distanceThrehold)
+            current = (current + 1) % targets.Count;
+            Invoke("MoveToNextTaget", delay);
+        }
+
+        if (enemy != null)
+        {
+            if (Vector3.Distance(transform.position, enemy.transform.position) <= distanceThrehold)
             {
-                //agent.isStopped = true;
-                if (i + 1 < targets.Count)
-                    agent.SetDestination(targets[i + 1].position);
+                enemy.GetComponent<MuderRobotAI>().Freeze();
             }
         }
-        
+    }
+
+    void Freeze()
+    {
+        agent.isStopped = true;
+    }
+
+    void MoveToNextTaget()
+    {
+        agent.SetDestination(targets[current].position);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "Robot")
+        {
+            enemy = other.gameObject;
+            agent.SetDestination(other.transform.position);
+        }
     }
 }
