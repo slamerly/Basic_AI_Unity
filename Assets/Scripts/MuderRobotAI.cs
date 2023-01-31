@@ -8,6 +8,7 @@ public class MuderRobotAI : MonoBehaviour
     private NavMeshAgent agent;
     [SerializeField] private List<Transform> targets;
 
+    public bool murder = false;
     public float distanceThrehold = 1.0f;
     private int current = 0, delay = 3;
     private GameObject enemy;
@@ -27,11 +28,14 @@ public class MuderRobotAI : MonoBehaviour
             Invoke("MoveToNextTaget", delay);
         }
 
-        if (enemy != null)
+        if (murder && enemy != null)
         {
+            agent.SetDestination(enemy.transform.position);
             if (Vector3.Distance(transform.position, enemy.transform.position) <= distanceThrehold)
             {
                 enemy.GetComponent<MuderRobotAI>().Freeze();
+                murder = false;
+                Invoke("MoveToNextTaget", delay);
             }
         }
     }
@@ -51,7 +55,6 @@ public class MuderRobotAI : MonoBehaviour
         if (other.gameObject.tag == "Robot")
         {
             enemy = other.gameObject;
-            agent.SetDestination(other.transform.position);
         }
     }
 }
